@@ -3,172 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apple Dashboard</title>
+    <title>Apple Hub Dashboard</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* --- CẤU HÌNH MÀU SẮC GIAO DIỆN (DARK MODE) --- */
+        /* --- CORE THEME (CHUẨN V16.5) --- */
         :root {
-            --bg: #000000;          /* Màu nền chính (Đen) */
-            --sidebar: #101012;     /* Màu nền thanh bên */
-            --card-bg: #1c1c1e;     /* Màu nền thẻ/hộp */
-            --border: #2c2c2e;      /* Màu viền */
+            --bg: #000000;
+            --sidebar: #101012;
+            --card-bg: #1c1c1e;
+            --border: #2c2c2e;
             --text-primary: #ffffff;
             --text-secondary: #8e8e93;
-            --accent: #0a84ff;      /* Màu xanh Apple */
-            --danger: #ff453a;      /* Màu đỏ báo lỗi */
-            --success: #30d158;     /* Màu xanh thành công */
-            --warning: #ffd60a;     /* Màu vàng cảnh báo */
+            --accent: #0a84ff;
+            --danger: #ff453a;
+            --warning: #ff9f0a;
+            --success: #30d158;
         }
 
-        /* --- THIẾT LẬP CHUNG --- */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text-primary); font-family: 'Inter', sans-serif; height: 100vh; display: flex; overflow: hidden; }
 
-        /* --- 1. MÀN HÌNH GIỚI THIỆU (INTRO) --- */
-        #intro-layer {
-            position: fixed; inset: 0; background: #000; z-index: 99999;
-            display: flex; align-items: center; justify-content: center;
-            animation: fadeOut 0.8s ease-out 1.5s forwards; pointer-events: none;
-        }
-        .intro-logo { font-size: 40px; font-weight: 800; letter-spacing: -2px; opacity: 0; animation: logoReveal 1.2s ease-out forwards; }
-        @keyframes logoReveal { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+        /* Animations */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes scan { 0%, 100% { transform: translate(-5px, -5px); } 50% { transform: translate(15px, 15px); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+        @keyframes logoReveal { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
 
-        /* --- 2. MÀN HÌNH CHÀO (WELCOME) --- */
-        #empty-state {
-            position: fixed; inset: 0; z-index: 50; background: var(--bg);
-            display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
-        }
-        .login-card {
-            background: var(--card-bg); width: 100%; max-width: 380px; padding: 40px 30px;
-            border-radius: 24px; text-align: center; border: 1px solid var(--border);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4); animation: slideUp 0.6s ease-out;
-        }
-        .icon-circle {
-            width: 64px; height: 64px; background: #2c2c2e; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;
-            font-size: 28px; color: #fff;
-        }
-        .btn-primary {
-            background: #fff; color: #000; width: 100%; padding: 14px; border-radius: 12px;
-            font-weight: 600; font-size: 15px; border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
-        }
-        .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+        /* Intro */
+        #intro-layer { position: fixed; inset: 0; background: #000; z-index: 99999; display: flex; align-items: center; justify-content: center; animation: fadeOut 0.8s ease-out 1.5s forwards; pointer-events: none; }
+        .intro-logo { font-size: 40px; font-weight: 800; letter-spacing: -2px; opacity: 0; animation: logoReveal 1.2s ease-out forwards; }
 
-        /* --- 3. GIAO DIỆN CHÍNH (DASHBOARD) --- */
+        /* Empty State */
+        #empty-state { position: fixed; inset: 0; z-index: 50; background: var(--bg); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .login-card { background: var(--card-bg); width: 100%; max-width: 380px; padding: 40px 30px; border-radius: 24px; text-align: center; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.4); animation: slideUp 0.5s ease; }
+        .icon-circle { width: 64px; height: 64px; background: #2c2c2e; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 28px; color: #fff; }
+        
+        /* --- SIDEBAR (REVERTED TO V16.5 STYLE) --- */
         #dashboard { display: none; width: 100%; height: 100%; }
+        .sidebar { width: 280px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 24px; display: flex; flex-direction: column; z-index: 100; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .brand { font-size: 18px; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
         
-        /* THANH BÊN (SIDEBAR) */
-        .sidebar {
-            width: 280px; background: var(--sidebar); border-right: 1px solid var(--border);
-            padding: 24px; display: flex; flex-direction: column; z-index: 100;
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .brand { font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-        
+        /* Cấu trúc này của V16.5 giúp menu gọn hơn */
         .sidebar-content { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 20px; }
-        
-        /* 3 Ô QUẢNG CÁO NHỎ */
         .sidebar-group-title { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px; }
-        .sidebar-actions-grid { display: flex; flex-direction: column; gap: 8px; }
+        .sidebar-actions-grid { display: flex; flex-direction: column; gap: 8px; } /* Khoảng cách 8px giúp nút xít nhau hơn */
         
-        .mini-box {
-            background: #1a1a1c; padding: 12px; border-radius: 12px; border: 1px solid var(--border);
-            display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s;
-        }
+        .mini-box { background: #1a1a1c; padding: 12px; border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; }
         .mini-box:hover { background: #252525; border-color: #444; }
         .mini-icon { color: var(--text-secondary); font-size: 14px; }
         .mini-text { font-size: 13px; font-weight: 500; color: #ddd; }
 
-        /* Ô SYSTEM ACTIVITY (TO VÀ RIÊNG BIỆT) */
-        .system-activity-box {
-            background: rgba(10, 132, 255, 0.05); /* Màu xanh nhạt */
-            border: 1px solid rgba(10, 132, 255, 0.2);
-            padding: 15px; border-radius: 16px; margin-top: auto; /* Đẩy xuống dưới */
-            cursor: pointer; transition: 0.2s;
-        }
+        .system-activity-box { background: rgba(10, 132, 255, 0.05); border: 1px solid rgba(10, 132, 255, 0.2); padding: 15px; border-radius: 16px; margin-top: auto; cursor: pointer; transition: 0.2s; }
         .system-activity-box:hover { background: rgba(10, 132, 255, 0.1); }
         .sys-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
         .sys-title { font-size: 14px; font-weight: 700; color: var(--accent); }
         .sys-preview { font-size: 11px; color: var(--text-secondary); font-family: 'JetBrains Mono'; }
 
-        /* NÚT THÊM THIẾT BỊ */
         .menu-footer { margin-top: 20px; flex-shrink: 0; }
-        .menu-btn-add {
-            width: 100%; background: var(--text-primary); color: var(--bg); border: none;
-            padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
-        }
-
-        /* KHUNG NHÌN CHÍNH (MAIN VIEW) */
+        
+        /* Main View */
         .main-view { flex: 1; display: flex; flex-direction: column; width: 100%; }
-        .header {
-            height: 60px; padding: 0 20px; border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between;
-        }
+        .header { height: 60px; padding: 0 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
         .mobile-toggle { display: none; font-size: 20px; cursor: pointer; }
+        .device-grid { padding: 20px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
 
-        .device-grid {
-            padding: 20px; overflow-y: auto; display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;
-        }
-
-        /* THẺ THIẾT BỊ (CARD) */
-        .card {
-            background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 20px;
-            cursor: pointer; transition: all 0.3s ease; position: relative;
-            animation: slideUp 0.5s ease forwards; opacity: 0;
-        }
+        /* Card Design */
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 20px; cursor: pointer; transition: 0.2s; position: relative; animation: slideUp 0.5s ease forwards; }
         .card:hover { transform: translateY(-4px); border-color: #555; }
         .card-head { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
         .c-avatar { width: 48px; height: 48px; border-radius: 12px; background: #333; object-fit: cover; }
         .c-status-badge { position: absolute; top: 20px; right: 20px; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
         .bg-online { background: rgba(48, 209, 88, 0.15); color: #30d158; border: 1px solid rgba(48, 209, 88, 0.3); }
         .bg-offline { background: rgba(142, 142, 147, 0.15); color: #8e8e93; border: 1px solid rgba(142, 142, 147, 0.3); }
+        .bg-wait { background: rgba(255, 214, 10, 0.15); color: #ffd60a; border: 1px solid rgba(255, 214, 10, 0.3); }
+        
         .stat-row { display: flex; justify-content: space-between; margin-top: 10px; }
         .stat-l { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; }
         .stat-v { font-size: 16px; font-weight: 700; font-family: 'JetBrains Mono'; }
         .session-info { font-size: 11px; color: var(--text-secondary); margin-top: 15px; padding-top: 10px; border-top: 1px solid #333; display: flex; justify-content: space-between; }
 
-        /* --- CÁC CỬA SỔ (MODALS) --- */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8); 
-            z-index: 20000; /* Luôn nằm trên cùng */
-            display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);
-            opacity: 0; transition: opacity 0.3s ease;
-        }
+        /* --- VERIFICATION & LOADING CSS --- */
+        .loader-container { position: absolute; inset: 0; background: #1c1c1e; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 20px; }
+        .spinner-icon { font-size: 35px; color: var(--accent); animation: spin 1s linear infinite; margin-bottom: 10px; }
+        
+        .verify-step { display: none; width: 100%; flex-direction: column; align-items: center; animation: popIn 0.3s ease; }
+        .verify-step.active { display: flex; }
+        
+        .scan-box { position: relative; width: 80px; height: 80px; margin: 20px auto; }
+        .noob-face { font-size: 50px; color: #ffd60a; position: absolute; top: 15px; left: 15px; }
+        .glass { font-size: 35px; color: #fff; position: absolute; top: 0; left: 0; animation: scan 2s infinite ease-in-out; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        
+        .v-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; margin-bottom: 10px; }
+        .btn-row { display: flex; gap: 10px; width: 100%; margin-top: 10px; }
+        .btn-yes { flex: 1; background: var(--success); color: #000; border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+        .btn-no { flex: 1; background: #2c2c2e; color: #fff; border: 1px solid #333; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+
+        /* Modals & Inputs */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 20000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease; }
         .modal-overlay.open { opacity: 1; }
-        .modal { 
-            background: #1c1c1e; padding: 24px; border-radius: 20px; width: 90%; max-width: 500px; 
-            border: 1px solid #333; text-align: center; transform: scale(0.95); opacity: 0; 
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        .modal { background: #1c1c1e; padding: 24px; border-radius: 20px; width: 90%; max-width: 500px; border: 1px solid #333; text-align: center; transform: scale(0.95); transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; }
         .modal-overlay.open .modal { transform: scale(1); opacity: 1; }
 
-        /* --- CỬA SỔ BÁO LỖI (ERROR WINDOW) --- */
-        .error-window {
-            border: 1px solid var(--danger);
-            background: #150505; /* Nền đỏ rất tối */
-        }
-        .err-icon { font-size: 40px; color: var(--danger); margin-bottom: 15px; }
-        .err-code { font-size: 28px; font-weight: 800; color: var(--danger); margin-bottom: 5px; font-family: 'JetBrains Mono'; }
-        .err-msg { font-size: 14px; color: #fff; margin-bottom: 20px; }
-        .err-contact { 
-            font-size: 12px; color: #888; border-top: 1px solid #330000; 
-            padding-top: 15px; margin-top: 15px; 
-        }
-        .err-contact a { color: #fff; text-decoration: none; border-bottom: 1px dotted #fff; }
-
-        /* INPUT STYLE */
         input { width: 100%; padding: 14px; border-radius: 10px; background: #2c2c2e; border: 1px solid #333; color: #fff; margin: 20px 0; outline: none; text-align: center; font-family: 'JetBrains Mono'; transition: 0.2s; }
         input:focus { border-color: #555; background: #333; }
-        
-        /* RESPONSIVE CHO ĐIỆN THOẠI */
+        .btn-primary { background: #fff; color: #000; width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 15px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+
+        /* Goals & Logs */
+        .goal-section { margin-top: 15px; padding-top: 15px; border-top: 1px solid #333; text-align: left; }
+        .prog-track { width: 100%; height: 6px; background: #2c2c2e; border-radius: 10px; overflow: hidden; margin-top:5px; }
+        .prog-fill { height: 100%; width: 0%; transition: width 0.5s ease; }
+        .fill-money { background: var(--accent); } .fill-level { background: #bf5af2; }
+        .log-container { text-align: left; max-height: 300px; overflow-y: auto; margin-top: 10px; background: #111; padding:10px; border-radius:10px; border:1px solid #333; }
+        .log-entry { font-size: 12px; font-family: 'JetBrains Mono'; margin-bottom: 5px; color:#ccc; }
+        .chart-box { height: 250px; width: 100%; margin: 20px 0; background: #151517; border-radius: 16px; border: 1px solid #333; padding: 15px; }
+
+        /* Error Window */
+        .error-window { background: #191919; border: 1px solid var(--warning); box-shadow: 0 10px 30px rgba(255, 159, 10, 0.1); }
+        .err-icon { font-size: 40px; color: var(--warning); margin-bottom: 10px; }
+        .err-code { font-size: 24px; font-weight: 700; color: #fff; font-family: 'JetBrains Mono'; margin-bottom: 5px; }
+        .err-msg { font-size: 13px; color: #ccc; margin-bottom: 20px; line-height: 1.5; }
+        .err-contact { font-size: 11px; color: #666; margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; }
+
         @media (max-width: 768px) {
             .sidebar { position: fixed; top: 0; bottom: 0; left: 0; width: 85%; max-width: 320px; transform: translateX(-100%); box-shadow: none; }
             .sidebar.open { transform: translateX(0); box-shadow: 10px 0 50px rgba(0,0,0,0.5); }
@@ -177,15 +138,6 @@
             .overlay-menu { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; display: none; opacity: 0; transition: opacity 0.3s; }
             .overlay-menu.open { display: block; opacity: 1; }
         }
-        
-        /* KHUNG LOG SYSTEM */
-        .log-container { text-align: left; max-height: 300px; overflow-y: auto; margin-top: 10px; border: 1px solid #333; border-radius: 10px; background: #111; }
-        .log-entry { padding: 10px; border-bottom: 1px solid #222; font-size: 12px; font-family: 'JetBrains Mono'; display: flex; gap: 10px; }
-        .log-time { color: #666; min-width: 60px; }
-        .log-msg { color: #ccc; }
-        
-        .chart-box { height: 280px; width: 100%; margin: 20px 0; background: #151517; border-radius: 16px; border: 1px solid #333; padding: 15px; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -196,18 +148,13 @@
         <div class="login-card">
             <div class="icon-circle"><i class="fa-brands fa-apple"></i></div>
             <h1>Welcome to Apple Hub</h1>
-            <p style="color:#888; font-size:14px; margin-bottom:30px; line-height:1.5">
-                Connect your Evade session to monitor stats.<br>Link up to 10 devices.
-            </p>
-            <button class="btn-primary" onclick="openLinkModal()">
-                <i class="fa-solid fa-link"></i> Link Token ID
-            </button>
+            <p style="color:#888; font-size:14px; margin-bottom:30px;">Connect your Evade session.</p>
+            <button class="btn-primary" onclick="openLinkModal()"><i class="fa-solid fa-link"></i> Link Token ID</button>
         </div>
     </div>
 
     <div id="dashboard">
         <div class="overlay-menu" onclick="toggleMenu()"></div>
-        
         <div class="sidebar" id="sidebar">
             <div class="brand"><i class="fa-brands fa-apple"></i> Apple Hub</div>
             
@@ -229,19 +176,14 @@
                 </div>
 
                 <div class="system-activity-box" onclick="openLogsModal()">
-                    <div class="sys-header">
-                        <i class="fa-solid fa-pulse" style="color:var(--accent)"></i>
-                        <span class="sys-title">System Activity</span>
-                    </div>
+                    <div class="sys-header"><i class="fa-solid fa-pulse" style="color:var(--accent)"></i> <span class="sys-title">System Activity</span></div>
                     <div class="sys-preview" id="sys-last-log">System Ready...</div>
                 </div>
             </div>
 
             <div class="menu-footer">
                 <div id="device-count" style="text-align:center; font-size:12px; color:#666; margin-bottom:10px;">0 / 10 Devices</div>
-                <button class="menu-btn-add" onclick="openLinkModal()">
-                    <i class="fa-solid fa-link"></i> Link New Device
-                </button>
+                <button class="btn-primary" onclick="openLinkModal()" style="width:100%; background:var(--text-primary); color:var(--bg); border:none; padding:12px; border-radius:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px"><i class="fa-solid fa-link"></i> Link New Device</button>
             </div>
         </div>
 
@@ -257,25 +199,48 @@
 
     <div class="modal-overlay" id="link-modal">
         <div class="modal">
-            <h3>Link Device</h3>
-            <p style="color:#888; font-size:12px; margin-top:5px">Enter Token ID from script.</p>
-            <input id="token-input" placeholder="Paste Token Here...">
-            <button class="btn-primary" onclick="addToken()">Connect</button>
-            <div style="margin-top:15px; font-size:13px; color:#666; cursor:pointer" onclick="closeLinkModal()">Cancel</div>
+            <div id="step-1" class="verify-step active">
+                <h3>Link Device</h3>
+                <p style="color:#888; font-size:12px; margin-top:5px">Enter Token ID from script.</p>
+                <input id="token-input" placeholder="Paste Token Here...">
+                <button class="btn-primary" onclick="startVerification()">Check ID</button>
+                <div style="margin-top:15px; font-size:13px; color:#666; cursor:pointer" onclick="closeLinkModal()">Cancel</div>
+            </div>
+            <div id="step-2" class="verify-step">
+                <div class="scan-box">
+                    <i class="fa-solid fa-user noob-face"></i>
+                    <i class="fa-solid fa-magnifying-glass glass"></i>
+                </div>
+                <h3>Searching...</h3>
+                <p style="color:#888; font-size:12px;">Looking for player data</p>
+            </div>
+            <div id="step-3" class="verify-step">
+                <img id="v-avatar" class="v-avatar" src="">
+                <h3 id="v-name" style="margin-bottom:5px">User</h3>
+                <div id="v-id" class="v-id">ID: ...</div>
+                <p style="font-size:14px; margin-bottom:15px">Is this you?</p>
+                <div class="btn-row">
+                    <button class="btn-no" onclick="resetVerify()">No, It's not</button>
+                    <button class="btn-yes" onclick="confirmLink()">Yes, It's me</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="detail-modal">
         <div class="modal">
+            <div id="detail-loader" class="loader-container" style="display:none;">
+                <i class="fa-solid fa-arrows-rotate spinner-icon"></i>
+                <div class="loader-text">Fetching Data...</div>
+            </div>
+
             <div style="display:flex; justify-content:space-between">
-                <h3 id="d-name">User</h3>
-                <i class="fa-solid fa-xmark" style="cursor:pointer; color:#666" onclick="closeDetailModal()"></i>
+                <h3 id="d-name">User</h3> <i class="fa-solid fa-xmark" style="cursor:pointer; color:#666" onclick="closeDetailModal()"></i>
             </div>
             <div id="d-token" style="font-family:monospace; font-size:11px; color:#666; margin-top:5px"></div>
 
             <div style="background:#222; border-radius:8px; padding:10px; margin-top:15px; font-size:12px; color:#aaa; display:flex; justify-content:space-between;">
-                <span>Status:</span>
-                <span id="d-session-status" style="color:#fff; font-weight:600">Checking...</span>
+                <span>Status:</span> <span id="d-session-status" style="color:#fff; font-weight:600">Checking...</span>
             </div>
 
             <div class="chart-box"><canvas id="chart"></canvas></div>
@@ -290,340 +255,288 @@
                     <div id="g-level" style="font-weight:700">...</div>
                 </div>
             </div>
+            
+            <div class="goal-section">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px">
+                    <h4 style="font-size:13px">Goal Tracker</h4>
+                    <button onclick="openGoalModal()" style="background:#333; border:none; color:#fff; font-size:10px; padding:4px 8px; border-radius:4px; cursor:pointer">Edit</button>
+                </div>
+                <div style="font-size:11px; color:#888; display:flex; justify-content:space-between"><span>Money</span><span id="prog-txt-money">0%</span></div>
+                <div class="prog-track"><div class="prog-fill fill-money" id="prog-bar-money"></div></div>
+                <div style="font-size:11px; color:#888; display:flex; justify-content:space-between; margin-top:10px"><span>Level</span><span id="prog-txt-level">0%</span></div>
+                <div class="prog-track"><div class="prog-fill fill-level" id="prog-bar-level"></div></div>
+            </div>
 
             <button onclick="removeToken()" style="width:100%; padding:12px; margin-top:20px; background:rgba(255,69,58,0.1); color:#ff453a; border:1px solid rgba(255,69,58,0.2); border-radius:10px; font-weight:600; cursor:pointer">Unlink Device</button>
         </div>
     </div>
 
-    <div class="modal-overlay" id="error-modal">
+    <div class="modal-overlay" id="goal-modal" style="z-index:21000"><div class="modal"><h3>Set Goals</h3><input id="inp-goal-money" type="number" placeholder="Target Money"><input id="inp-goal-level" type="number" placeholder="Target Level"><button class="btn-primary" onclick="saveGoals()">Save</button><div style="margin-top:10px; color:#666; cursor:pointer" onclick="closeGoalModal()">Cancel</div></div></div>
+    <div class="modal-overlay" id="logs-modal"><div class="modal" style="max-width:600px"><h3>System Activity</h3><div class="log-container" id="log-list"></div><button onclick="closeLogsModal()" style="margin-top:15px; background:transparent; border:1px solid #444; color:#888; padding:8px 16px; border-radius:8px; cursor:pointer">Close</button></div></div>
+    
+    <div class="modal-overlay" id="error-modal" style="z-index: 30000;">
         <div class="modal error-window">
             <i class="fa-solid fa-triangle-exclamation err-icon"></i>
             <div class="err-code" id="err-code-display">ERR-000</div>
-            <div class="err-msg" id="err-msg-display">Something went wrong</div>
-            
-            <button onclick="closeErrorModal()" style="background:#fff; color:#000; border:none; padding:10px 20px; border-radius:8px; font-weight:600; cursor:pointer;">Close</button>
-            
-            <div class="err-contact">
-                <a href="#">Contact Developer for support</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="logs-modal">
-        <div class="modal" style="max-width: 600px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px">
-                <h3>System Activity</h3>
-                <i class="fa-solid fa-xmark" style="cursor:pointer" onclick="closeLogsModal()"></i>
-            </div>
-            <div class="log-container" id="log-list">
-                </div>
-            <button onclick="clearLogs()" style="margin-top:15px; background:transparent; border:1px solid #444; color:#888; padding:8px 16px; border-radius:8px; cursor:pointer">Clear History</button>
+            <div class="err-msg" id="err-msg-display">Something went wrong.</div>
+            <button onclick="closeErrorModal()" style="background:#333; color:#fff; width:100%; padding:10px; border-radius:10px; border:none; margin-top:10px; cursor:pointer; font-weight:600">Dismiss</button>
+            <div class="err-contact">Support: <span style="color:#fff">Discord #applehub</span></div>
         </div>
     </div>
 
     <script>
-        // --- CẤU HÌNH DATABASE ---
         const DB_URL = "https://apple-hub-f43e4-default-rtdb.asia-southeast1.firebasedatabase.app/";
-        
-        // --- BIẾN TOÀN CỤC ---
-        let tokens = JSON.parse(localStorage.getItem('apple_tokens_v16')) || [];
-        let systemLogs = JSON.parse(localStorage.getItem('system_logs_v16')) || [];
+        let tokens = JSON.parse(localStorage.getItem('apple_tokens_v20')) || [];
+        let userGoals = JSON.parse(localStorage.getItem('apple_goals_v20')) || {};
+        let systemLogs = [];
         let curToken = null;
+        let tempToken = null;
         let chart = null;
+        let currentDetailData = null;
 
-        // --- KHỞI TẠO ỨNG DỤNG ---
-        setTimeout(() => checkState(), 1500); // Chờ Intro chạy xong
+        setTimeout(() => checkState(), 1500);
 
         function checkState() {
             if (tokens.length === 0) {
-                // Chưa có Token -> Hiện Welcome, ẩn Dashboard
                 document.getElementById('empty-state').style.display = 'flex';
                 document.getElementById('dashboard').style.display = 'none';
             } else {
-                // Đã có Token -> Hiện Dashboard
                 document.getElementById('empty-state').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'flex';
                 renderGrid();
-                // Chạy vòng lặp cập nhật
                 if(!window.refreshInt) window.refreshInt = setInterval(renderGrid, 5000);
                 if(!window.clockInt) window.clockInt = setInterval(updateLiveTimes, 1000);
             }
-            document.getElementById('device-count').innerText = `${tokens.length} / 10 Devices`;
+            document.getElementById('device-count').innerText = `${tokens.length}/10 Devices`;
         }
 
-        // --- HỆ THỐNG XỬ LÝ LỖI (ERROR WINDOW) ---
-        function showError(code, message) {
+        // --- ERROR HANDLER ---
+        function showError(code, msg) {
             document.getElementById('err-code-display').innerText = `ERR-${code}`;
-            document.getElementById('err-msg-display').innerText = message;
+            document.getElementById('err-msg-display').innerText = msg;
             openModalAnim('error-modal');
         }
         function closeErrorModal() { closeModalAnim('error-modal'); }
 
-        // --- HỆ THỐNG LOG (SYSTEM ACTIVITY - KHÔNG PHẢI LỖI) ---
-        function logActivity(msg) {
-            const time = new Date().toLocaleTimeString();
-            const entry = { time, msg };
-            
-            // Cập nhật Preview bên ngoài
-            document.getElementById('sys-last-log').innerText = `${time} - ${msg}`;
-            
-            // Lưu vào mảng
-            systemLogs.unshift(entry);
-            if(systemLogs.length > 50) systemLogs.pop(); // Giữ tối đa 50 dòng
-            localStorage.setItem('system_logs_v16', JSON.stringify(systemLogs));
+        // --- VERIFICATION ---
+        function setVerifyStep(step) {
+            document.querySelectorAll('.verify-step').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step-${step}`).classList.add('active');
         }
 
-        function renderLogs() {
-            const c = document.getElementById('log-list');
-            c.innerHTML = '';
-            systemLogs.forEach(l => {
-                c.innerHTML += `
-                    <div class="log-entry">
-                        <span class="log-time">${l.time}</span>
-                        <span class="log-msg">${l.msg}</span>
-                    </div>
-                `;
-            });
-        }
+ // --- THAY THẾ HÀM NÀY TRONG FILE INDEX.HTML ---
+
+async function startVerification() {
+    const val = document.getElementById('token-input').value.trim();
+    if (!val) { showError(1001, "Please enter a valid Token."); return; }
+    if (tokens.includes(val)) { showError(1003, "Device is already linked."); return; }
+    if (tokens.length >= 10) { showError(1002, "Device limit reached (Max 10)."); return; }
+    
+    tempToken = val;
+    setVerifyStep(2); // Hiện hoạt ảnh Noob soi kính lúp
+
+    try {
+        // 1. Đọc dữ liệu từ file gốc của Token
+        const res = await fetch(`${DB_URL}Users/${val}/Current.json`);
+        const d = await res.json();
         
-        function clearLogs() {
-            systemLogs = [];
-            localStorage.setItem('system_logs_v16', JSON.stringify([]));
-            renderLogs();
-            document.getElementById('sys-last-log').innerText = "Logs cleared.";
+        setTimeout(() => {
+            // Nếu không tìm thấy dữ liệu trên Firebase
+            if (!d) {
+                showError(1001, "Token not found. Run script in game first!");
+                resetVerify();
+                return;
+            }
+            
+            // 2. LẤY AVATAR TỪ API NEWSTARGETED (MỚI)
+            // Ưu tiên link do Script Lua gửi lên (d.Avatar). 
+            // Nếu không có, Web tự tạo link bằng UserId lấy được.
+            let avatarUrl = d.Avatar;
+            
+            if (!avatarUrl && d.UserId) {
+                // Link API dự phòng nếu Script Lua chưa kịp gửi link
+                avatarUrl = `https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid=${d.UserId}&size=150x150&format=Png&isCircular=false`;
+            } 
+            
+            // Nếu vẫn không có (lỗi mạng/chưa có userId), dùng ảnh Noob mặc định
+            if (!avatarUrl) {
+                avatarUrl = "https://tr.rbxcdn.com/53eb9b17fe1432a802c7eb904f13499e/150/150/AvatarHeadshot/Png";
+            }
+
+            const username = d.Username || "Unknown Player";
+
+            // 3. Hiển thị lên giao diện
+            document.getElementById('v-avatar').src = avatarUrl;
+            document.getElementById('v-name').innerText = username;
+            document.getElementById('v-id').innerText = `ID: ${val}`;
+            
+            setVerifyStep(3); // Chuyển sang bước xác nhận
+        }, 1500);
+
+    } catch (e) { 
+        console.error(e);
+        showError(2001, "Connection failed. Check your internet."); 
+        resetVerify(); 
+    }
+}
+
+
+        function resetVerify() { tempToken = null; document.getElementById('token-input').value = ''; setVerifyStep(1); }
+          function confirmLink() {
+            if(!tempToken) return;
+            
+            // 1. Lưu Token vào bộ nhớ Web
+            tokens.push(tempToken);
+            localStorage.setItem('apple_tokens_v20', JSON.stringify(tokens));
+            
+            // --- [THÊM ĐOẠN QUAN TRỌNG NÀY] ---
+            // Gửi tín hiệu "true" lên Firebase để Script Lua biết đường chạy
+            fetch(`${DB_URL}Users/${tempToken}/IsLinked.json`, {
+                method: 'PUT', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify("true") // Gửi chuỗi "true"
+            }).then(() => {
+                console.log("✅ Activation Signal Sent!");
+            }).catch(err => console.error("❌ Signal Failed:", err));
+            // ------------------------------------
+
+            // 2. Cập nhật giao diện
+            logActivity(`Linked: ${tempToken}`);
+            resetVerify(); 
+            closeLinkModal(); 
+            checkState(); 
+            renderGrid();
         }
 
-        // --- CÁC HÀM UI (ANIMATION) ---
-        function toggleMenu() { 
-            document.getElementById('sidebar').classList.toggle('open'); 
-            document.querySelector('.overlay-menu').classList.toggle('open'); 
+
+        // --- DETAIL ---
+        async function showDetail(t, d, isOnline) {
+            curToken = t;
+            currentDetailData = d;
+            document.getElementById('d-name').innerText = d ? d.Username : "Unknown";
+            document.getElementById('d-token').innerText = t;
+            
+            if(d) {
+                document.getElementById('d-session-status').innerText = isOnline ? "Active" : "Offline";
+                document.getElementById('d-session-status').style.color = isOnline ? "#30d158" : "#888";
+                updateGoalUI(d);
+            } else {
+                document.getElementById('d-session-status').innerText = "Waiting...";
+                document.getElementById('d-session-status').style.color = "#ffd60a";
+            }
+
+            openModalAnim('detail-modal');
+            const loader = document.getElementById('detail-loader');
+            loader.style.display = 'flex';
+
+            try {
+                const hRes = await fetch(`${DB_URL}Users/${t}/History.json`);
+                const hData = await hRes.json();
+                setTimeout(() => { loader.style.display = 'none'; }, 600);
+                const points = Object.values(hData || {}).slice(-30);
+                calcGrowth(hData);
+                initChart(points);
+            } catch (e) { loader.style.display = 'none'; showError(3001, "Chart data unavailable."); }
         }
-        function openModalAnim(id) {
-            const el = document.getElementById(id);
-            el.style.display = 'flex'; el.offsetHeight; el.classList.add('open');
-        }
-        function closeModalAnim(id) {
-            const el = document.getElementById(id);
-            el.classList.remove('open'); setTimeout(() => { el.style.display = 'none'; }, 300);
-        }
-        
-        // Wrapper functions
-        function openLinkModal() { openModalAnim('link-modal'); }
+
+        // --- HELPERS ---
+        function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); document.querySelector('.overlay-menu').classList.toggle('open'); }
+        function openModalAnim(id) { document.getElementById(id).style.display='flex'; document.getElementById(id).offsetHeight; document.getElementById(id).classList.add('open'); }
+        function closeModalAnim(id) { document.getElementById(id).classList.remove('open'); setTimeout(()=>document.getElementById(id).style.display='none',300); }
+        function openLinkModal() { resetVerify(); openModalAnim('link-modal'); }
         function closeLinkModal() { closeModalAnim('link-modal'); }
         function closeDetailModal() { closeModalAnim('detail-modal'); }
+        function openGoalModal() { const g = userGoals[curToken] || {money:0, level:0}; document.getElementById('inp-goal-money').value = g.money||''; document.getElementById('inp-goal-level').value = g.level||''; openModalAnim('goal-modal'); }
+        function closeGoalModal() { closeModalAnim('goal-modal'); }
         function openLogsModal() { renderLogs(); openModalAnim('logs-modal'); }
         function closeLogsModal() { closeModalAnim('logs-modal'); }
+        function logActivity(msg) { const t=new Date().toLocaleTimeString(); systemLogs.unshift({time:t, msg:msg}); document.getElementById('sys-last-log').innerText=`${t} - ${msg}`; }
+        function renderLogs() { const c=document.getElementById('log-list'); c.innerHTML=''; systemLogs.forEach(l=>c.innerHTML+=`<div class="log-entry">${l.time} - ${l.msg}</div>`); }
+        function removeToken() { if(confirm('Unlink?')) { tokens=tokens.filter(t=>t!==curToken); localStorage.setItem('apple_tokens_v20', JSON.stringify(tokens)); delete userGoals[curToken]; localStorage.setItem('apple_goals_v20', JSON.stringify(userGoals)); closeDetailModal(); checkState(); } }
+        function saveGoals() { const m=parseInt(document.getElementById('inp-goal-money').value)||0; const l=parseInt(document.getElementById('inp-goal-level').value)||0; userGoals[curToken]={money:m, level:l}; localStorage.setItem('apple_goals_v20', JSON.stringify(userGoals)); closeGoalModal(); if(currentDetailData) updateGoalUI(currentDetailData); }
+        function updateGoalUI(d) { if(!d) return; const g=userGoals[curToken]||{money:0, level:0}; let mPct=g.money>0?Math.min(100,(d.Money/g.money)*100):0; let lPct=g.level>0?Math.min(100,(d.Level/g.level)*100):0; document.getElementById('prog-bar-money').style.width=`${mPct}%`; document.getElementById('prog-txt-money').innerText=`${mPct.toFixed(1)}%`; document.getElementById('prog-bar-level').style.width=`${lPct}%`; document.getElementById('prog-txt-level').innerText=`${lPct.toFixed(1)}%`; }
+        function formatTime(s) { if(s<0) s=0; const h=Math.floor(s/3600).toString().padStart(2,'0'); const m=Math.floor((s%3600)/60).toString().padStart(2,'0'); const sec=(s%60).toString().padStart(2,'0'); return `${h}:${m}:${sec}`; }
+        function updateLiveTimes() { document.querySelectorAll('.live-clock').forEach(c => { const start=parseFloat(c.getAttribute('data-start')); if(start) c.innerText=formatTime(Math.floor(Date.now()/1000-start)); }); }
+        function calcGrowth(h) { try { const p=Object.values(h||{}); if(p.length<2) throw new Error(); const f=p[0], l=p[p.length-1], diff=l.Time-f.Time; if(diff<=0) throw new Error(); document.getElementById('g-money').innerText="+"+Math.floor(((l.Money-f.Money)/diff)*3600).toLocaleString(); document.getElementById('g-level').innerText="+"+(((l.Level-f.Level)/diff)*3600).toFixed(1); } catch(e) { document.getElementById('g-money').innerText="..."; document.getElementById('g-level').innerText="..."; } }
 
-        // --- LOGIC THÊM TOKEN ---
-        function addToken() {
-            try {
-                const val = document.getElementById('token-input').value.trim();
-                
-                // Kiểm tra lỗi đầu vào
-                if (!val) { showError(1001, "Token input cannot be empty."); return; }
-                if (tokens.length >= 10) { showError(1002, "Device limit reached (Max 10)."); return; }
-                if (tokens.includes(val)) { showError(1003, "Device already linked."); return; }
-
-                // Thêm Token
-                tokens.push(val);
-                localStorage.setItem('apple_tokens_v16', JSON.stringify(tokens));
-                
-                logActivity(`Linked new device: ${val.substring(0,6)}...`);
-                
-                document.getElementById('token-input').value = '';
-                closeLinkModal();
-                checkState();
-                renderGrid();
-            } catch(e) {
-                showError(9999, "Unknown system error.");
-            }
-        }
-
-        function removeToken() {
-            if(confirm('Unlink this device?')) {
-                logActivity(`Unlinked device: ${curToken.substring(0,6)}...`);
-                tokens = tokens.filter(t => t !== curToken);
-                localStorage.setItem('apple_tokens_v16', JSON.stringify(tokens));
-                closeDetailModal();
-                checkState();
-            }
-        }
-
-        function formatTime(seconds) {
-            if(seconds < 0) seconds = 0;
-            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
-            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-            const s = (seconds % 60).toString().padStart(2, '0');
-            return `${h}:${m}:${s}`;
-        }
-
-        // --- RENDER DANH SÁCH THIẾT BỊ ---
+        // --- RENDER GRID ---
         async function renderGrid() {
             if(tokens.length === 0) return;
             const grid = document.getElementById('grid');
-            grid.innerHTML = ''; 
-
-            let idx = 0;
-            for(const t of tokens) {
+            grid.innerHTML = '';
+            for(let i=0; i<tokens.length; i++) {
+                const t = tokens[i];
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.style.animationDelay = (idx * 0.1) + 's'; idx++;
-                card.innerHTML = `<small style="color:#666">Loading data...</small>`;
+                card.style.animationDelay = (i*0.1)+'s';
                 grid.appendChild(card);
-
+                
                 try {
                     const res = await fetch(`${DB_URL}Users/${t}/Current.json`);
-                    
-                    // Nếu lỗi mạng -> Hiện cửa sổ lỗi
-                    if(!res.ok) { showError(2001, `Connection failed for ${t}`); throw new Error(); }
-                    
                     const d = await res.json();
-                    // Nếu không có dữ liệu -> Báo lỗi dữ liệu
-                    if(!d) { showError(2003, `No data found for token ${t}`); throw new Error(); }
+                    
+                    if(!d) {
+                        card.innerHTML = `
+                            <div class="c-status-badge bg-wait">WAITING</div>
+                            <div class="card-head">
+                                <div style="width:48px;height:48px;background:#222;border-radius:12px;display:flex;align-items:center;justify-content:center"><i class="fa-solid fa-spinner fa-spin" style="color:#ffd60a"></i></div>
+                                <div><div style="font-weight:600">Waiting for Script...</div><div style="font-size:11px; color:#666">${t}</div></div>
+                            </div>
+                            <div style="font-size:12px; color:#666; margin-top:15px; text-align:center">Run script in Roblox to sync.</div>
+                        `;
+                        card.onclick = () => { if(confirm("Unlink this token?")) {curToken=t; removeToken();} };
+                        continue; 
+                    }
 
-                    const now = Date.now() / 1000;
+                    const now = Date.now()/1000;
                     const lastUpd = d.LastUpdated || 0;
                     const isOnline = (now - lastUpd) < 90;
-                    let avatar = d.Avatar || "https://tr.rbxcdn.com/53eb9b17fe1432a802c7eb904f13499e/150/150/AvatarHeadshot/Png";
-
-                    let timeText = "";
-                    let badgeClass = isOnline ? "bg-online" : "bg-offline";
-                    let badgeText = isOnline ? "LIVE" : "OFFLINE";
+                    const avatar = d.Avatar || "https://tr.rbxcdn.com/53eb9b17fe1432a802c7eb904f13499e/150/150/AvatarHeadshot/Png";
                     
-                    if (isOnline) {
-                        const start = d.StartTime || lastUpd;
-                        const uptimeSec = Math.floor(now - start);
-                        timeText = `Running: <span class="live-clock" data-start="${start}">${formatTime(uptimeSec)}</span>`;
+                    let timeText;
+                    if(isOnline) {
+                         const start = d.StartTime || lastUpd;
+                         timeText = `Running: <span class="live-clock" data-start="${start}">${formatTime(Math.floor(now - start))}</span>`;
                     } else {
-                        const date = new Date(lastUpd * 1000);
-                        timeText = `Disconnected at ${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
+                         const dateObj = new Date(lastUpd * 1000);
+                         const timeStr = dateObj.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+                         timeText = `<span style="color:#ff453a">Disconnected: ${timeStr}</span>`;
                     }
 
                     card.innerHTML = `
-                        <div class="c-status-badge ${badgeClass}">${badgeText}</div>
+                        <div class="c-status-badge ${isOnline?'bg-online':'bg-offline'}">${isOnline?'LIVE':'OFFLINE'}</div>
                         <div class="card-head">
-                            <img src="${avatar}" class="c-avatar" onerror="this.src='https://tr.rbxcdn.com/53eb9b17fe1432a802c7eb904f13499e/150/150/AvatarHeadshot/Png'">
-                            <div>
-                                <div style="font-weight:600; font-size:15px">${d.Username || 'Unknown'}</div>
-                                <div style="font-size:11px; color:#666; font-family:monospace">${t.substring(0,8)}...</div>
-                            </div>
+                            <img src="${avatar}" class="c-avatar">
+                            <div><div style="font-weight:600">${d.Username}</div><div style="font-size:11px; color:#666">${t.substring(0,8)}</div></div>
                         </div>
                         <div class="stat-row">
-                            <div><div class="stat-l">BALANCE</div><div class="stat-v">$${(d.Money||0).toLocaleString()}</div></div>
+                            <div><div class="stat-l">MONEY</div><div class="stat-v">$${(d.Money||0).toLocaleString()}</div></div>
                             <div style="text-align:right"><div class="stat-l">LEVEL</div><div class="stat-v">${d.Level||0}</div></div>
                         </div>
-                        <div class="session-info"><span>${timeText}</span></div>
+                        <div class="session-info">${timeText}</div>
                     `;
-                    card.onclick = () => showDetail(t, d, isOnline, timeText);
+                    card.onclick = () => showDetail(t, d, isOnline);
                 } catch(e) {
-                    card.innerHTML = `<small style="color:#ff453a">Load Failed</small>`;
-                    card.onclick = () => { curToken = t; removeToken(); }
+                    card.innerHTML = `<small style="color:var(--danger)">Network Error</small>`;
+                    card.onclick = () => { curToken=t; removeToken(); }
                 }
             }
+            updateLiveTimes();
         }
 
-        // Cập nhật đồng hồ thời gian thực
-        function updateLiveTimes() {
-            const clocks = document.querySelectorAll('.live-clock');
-            const now = Date.now() / 1000;
-            clocks.forEach(c => {
-                const start = parseFloat(c.getAttribute('data-start'));
-                if(start) c.innerText = formatTime(Math.floor(now - start));
-            });
-        }
-
-        // --- HIỂN THỊ CHI TIẾT ---
-        async function showDetail(t, d, isOnline, timeText) {
-            try {
-                curToken = t;
-                document.getElementById('d-name').innerText = d.Username;
-                document.getElementById('d-token').innerText = t;
-                
-                const statusEl = document.getElementById('d-session-status');
-                statusEl.innerHTML = timeText.replace("span", "b"); 
-                statusEl.style.color = isOnline ? "#30d158" : "#888";
-
-                openModalAnim('detail-modal'); 
-                
-                logActivity(`Opened detail view for ${d.Username}`);
-
-                const hRes = await fetch(`${DB_URL}Users/${t}/History.json`);
-                if(!hRes.ok) throw new Error();
-                
-                const hData = await hRes.json();
-                const points = Object.values(hData || {}).slice(-30);
-                
-                calcGrowth(hData);
-                initChart(points);
-            } catch (e) {
-                showError(5001, "Failed to load history data.");
-            }
-        }
-
-        // --- TÍNH TOÁN TĂNG TRƯỞNG ---
-        function calcGrowth(history) {
-            try {
-                const points = Object.values(history||{});
-                if(points.length < 2) throw new Error();
-                const f = points[0]; const l = points[points.length-1];
-                const diff = l.Time - f.Time;
-                if(diff <= 0) throw new Error();
-                
-                const mHr = ((l.Money - f.Money)/diff)*3600;
-                const lHr = ((l.Level - f.Level)/diff)*3600;
-                
-                document.getElementById('g-money').innerText = "+$"+Math.max(0, Math.floor(mHr)).toLocaleString();
-                document.getElementById('g-level').innerText = "+"+Math.max(0, lHr.toFixed(1));
-            } catch(e) {
-                document.getElementById('g-money').innerText = "...";
-                document.getElementById('g-level').innerText = "...";
-            }
-        }
-
-        // --- VẼ BIỂU ĐỒ (CHART.JS) ---
         function initChart(points) {
             const ctx = document.getElementById('chart').getContext('2d');
             if(chart) chart.destroy();
-
-            if(!points || points.length === 0) { showError(3001, "Chart data empty"); return; }
-
-            const gradM = ctx.createLinearGradient(0,0,0,300);
-            gradM.addColorStop(0, 'rgba(10, 132, 255, 0.2)'); gradM.addColorStop(1, 'rgba(10, 132, 255, 0)');
-
+            if(!points || points.length===0) return;
+            const grad = ctx.createLinearGradient(0,0,0,300);
+            grad.addColorStop(0, 'rgba(10,132,255,0.2)'); grad.addColorStop(1, 'rgba(10,132,255,0)');
             chart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: points.map(p => new Date(p.Time * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})),
-                    datasets: [
-                        { label: 'Money', data: points.map(p=>p.Money), borderColor: '#0a84ff', backgroundColor: gradM, borderWidth: 2, fill:true, pointRadius: 0, pointHoverRadius: 6, tension: 0.4, yAxisID: 'y' },
-                        { label: 'Level', data: points.map(p=>p.Level), borderColor: '#bf5af2', borderWidth: 2, borderDash: [4,4], pointRadius: 0, pointHoverRadius: 6, tension: 0.4, yAxisID: 'y1' }
-                    ]
+                    labels: points.map(p=>new Date(p.Time*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})),
+                    datasets: [{label:'Money',data:points.map(p=>p.Money),borderColor:'#0a84ff',backgroundColor:grad,fill:true,tension:0.4,yAxisID:'y'},{label:'Level',data:points.map(p=>p.Level),borderColor:'#bf5af2',borderDash:[4,4],tension:0.4,yAxisID:'y1'}]
                 },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(28, 28, 30, 0.95)',
-                            titleColor: '#fff', bodyColor: '#ccc', borderColor: '#333', borderWidth: 1, padding: 12,
-                            displayColors: true,
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label === 'Money') return ` 💵 $${context.parsed.y.toLocaleString()}`;
-                                    if (label === 'Level') return ` ⭐ Lv. ${context.parsed.y}`;
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: { 
-                        x: { display: false }, 
-                        y: { display: false, position: 'left' }, 
-                        y1: { display: false, position: 'right', grid: { drawOnChartArea: false } } 
-                    }
-                }
+                options: { responsive:true, maintainAspectRatio:false, interaction: { mode: 'index', intersect: false }, plugins:{legend:{display:false}}, scales:{x:{display:false},y:{display:false},y1:{display:false}} }
             });
         }
     </script>
